@@ -2,27 +2,30 @@ from typing import AsyncIterator
 
 import grpclib
 from cdktf import TerraformStack, App
-from constructs import Construct
-from nitric.proto.deployments.v1 import DeploymentBase, DeploymentUpRequest, DeploymentUpEvent, DeploymentDownRequest, DeploymentDownEvent
+from .stack import MyStack
+from nitric.proto.deployments.v1 import (
+    DeploymentBase,
+    DeploymentUpRequest,
+    DeploymentUpEvent,
+    DeploymentDownRequest,
+    DeploymentDownEvent,
+)
 
-class MyStack(TerraformStack):
-    def __init__(self, scope: Construct, id: str):
-        super().__init__(scope, id)
-
-        # define resources here
 
 class DeploymentService(DeploymentBase):
+    """Deployment Service implementation"""
+
     async def up(
         self, deployment_up_request: DeploymentUpRequest
     ) -> AsyncIterator[DeploymentUpEvent]:
         # Start the tf cdk deployment
         # The end result will be the synthesis of a terraform application
-        # This will be a json output, but templating HCL is also possible if required
-        yield DeploymentDownEvent(message="Starting TDCDK Deployment")
+        # This will be a json output, but HCL output is also possible if required
+        yield DeploymentUpEvent(message="Starting TDCDK Deployment")
 
-        yield DeploymentDownEvent(message="Outputting results")
+        yield DeploymentUpEvent(message="Outputting results")
 
-        app = App()
+        app = App(hcl_output=True)
         MyStack(app, "learn-cdktf")
 
         app.synth()

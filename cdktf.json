@@ -1,0 +1,25 @@
+{
+  "language": "python",
+  "app": "pipenv run python main.py",
+  "projectId": "2aa2867a-aeaa-4ef6-afdb-d6cddb0e5a6a",
+  "sendCrashReports": "false",
+  "terraformProviders": [],
+  "terraformModules": [
+    {
+      "name": "cloudrun",
+      "source": "./modules/cloudrun"
+    },
+    {
+      "name": "api",
+      "source": "./modules/api"
+    },
+    {
+      "name": "storage",
+      "source": "./modules/storage"
+    }
+  ],
+  "codeMakerOutput": "imports",
+  "context": {
+
+  }
+}

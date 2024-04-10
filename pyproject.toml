@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "provider"
+version = "0.1.0"
+description = ""
+authors = ["Tim Holm <tim.holm@nitric.io>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+asyncio = "^3.4.3"
+protobuf = "4.23.3"
+betterproto = "2.0.0b6"
+nitric = "1.0.2"
+cdktf = "~=0.20.0"
+
+[tool.poetry.dev-dependencies]
+grpcio-tools = "1.62.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+

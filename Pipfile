@@ -2,10 +2,29 @@
 url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
+# [tool.poetry.dependencies]
+# python = "^3.11"
+# asyncio = "^3.4.3"
+# protobuf = "4.23.3"
+# betterproto = "2.0.0b6"
+# nitric = "1.0.2"
+# cdktf = "~=0.20.0"
+# docker = "^7.0.0"
+# [tool.poetry.dev-dependencies]
+# grpcio-tools = "1.62.0"
 
 [packages]
+asyncio = "3.4.3"
+protobuf = "4.23.3"
+betterproto = "2.0.0b6"
+nitric = "1.0.2"
+cdktf = "~=0.20.0"
+docker = "7.0.0"
+pyinstaller = "*"
+jsii = "*"
 
 [dev-packages]
+grpcio-tools = "1.62.0"
 
 [requires]
 python_version = "3.11"

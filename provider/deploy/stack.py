@@ -1,6 +1,4 @@
-from typing import AsyncIterator
-
-from cdktf import TerraformStack, App, TerraformVariable
+from cdktf import TerraformStack, TerraformVariable
 from constructs import Construct
 from nitric.proto.deployments.v1 import (
     # DeploymentBase,

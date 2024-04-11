@@ -1,8 +1,7 @@
 from typing import AsyncIterator
 
-import grpclib
-from cdktf import TerraformStack, App
-from .stack import MyStack
+from cdktf import App
+from .stack import TerraformGoogleCloudStack
 from nitric.proto.deployments.v1 import (
     DeploymentBase,
     DeploymentUpRequest,
@@ -26,12 +25,9 @@ class DeploymentService(DeploymentBase):
         yield DeploymentUpEvent(message="Outputting results")
 
         app = App(hcl_output=True)
-        MyStack(app, "learn-cdktf")
+        TerraformGoogleCloudStack(app, "stack", deployment_up_request)
 
         app.synth()
-
-        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
-        yield DeploymentUpEvent()
 
     async def down(
         self, deployment_down_request: DeploymentDownRequest
@@ -39,5 +35,6 @@ class DeploymentService(DeploymentBase):
         # This is technically a no-op unless we want to interactively being tearing down the
         # stack based on the current tfstate
         # This can be done by simply spawning the terraform CLI against the current terraform project
-        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
-        yield DeploymentDownEvent()
+        yield DeploymentDownEvent(message="Run terraform destroy to tear down the stack")
+
+

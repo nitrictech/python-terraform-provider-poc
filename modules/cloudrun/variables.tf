@@ -1,3 +1,8 @@
+variable "project_id" {
+  description = "The location of the pushed docker image to use"
+  type        = string
+}
+
 variable "image_uri" {
   description = "The location of the pushed docker image to use"
   type        = string

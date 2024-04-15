@@ -1,4 +1,4 @@
-output "container_app_identity" {
-  value       = azurerm_container_app.app.identity.0.principal_id
-  description = "The managed identity of this container app"
+output "url" {
+  value       = google_cloud_run_service.nitric_compute.statuses[0].url
+  description = "The URL of the Google Cloud Run instance"
 }

@@ -16,6 +16,8 @@ from docker.errors import APIError
 from imports.cloudrun import Cloudrun
 from imports.storage import Storage
 from imports.api import Api
+from imports.roles import Roles
+from imports.policy import Policy
 
 
 def source_image_cmd(source_image):
@@ -81,9 +83,6 @@ class TerraformGoogleCloudStack(TerraformStack):
         # project_id: str = req.attributes.to_dict().get("gcp-project-id", None)
         resources = req.spec.resources
 
-        services: dict[str, Cloudrun] = {}
-        buckets: dict[str, Storage] = {}
-
         gcp_project_id = TerraformVariable(
             self,
             "gcpProjectId",
@@ -98,62 +97,67 @@ class TerraformGoogleCloudStack(TerraformStack):
             description="What region should the stack be deployed to",
         )
 
-        for resource in resources:
-            resource_type, _ = betterproto.which_one_of(resource, "config")
+        # Normally this would be a separate stack
+        # Adding this here for the sake of demo completeness 
+        nitric_roles = Roles(self, "nitric_roles", project_id=gcp_project_id.string_value)
 
-            # print(f">Creating resource: {resource_type}<")
+        # Filter for all services in resources
+        all_services = [res for res in resources if betterproto.which_one_of(res, "config")[0] == "service"]
+        all_apis = [res for res in resources if betterproto.which_one_of(res, "config")[0] == "api"]
+        all_buckets = [res for res in resources if betterproto.which_one_of(res, "config")[0] == "bucket"]
+        all_policies = [res for res in resources if betterproto.which_one_of(res, "config")[0] == "policy"]
 
-            if resource_type == "service":
-                # Wrap the source image with the runtime
-                cmd = source_image_cmd(resource.service.image.uri)
 
-                create_provider_runtime_image(
-                    resource.service.image.uri, resource.id.name
-                )
+        services: dict[str, Cloudrun] = {}
+        # Deploy all services
+        for service in all_services:
+            # Wrap the source image with the runtime
+            cmd = source_image_cmd(service.service.image.uri)
 
-                svc_resource = Cloudrun(
-                    self,
-                    resource.id.name,
-                    service_name=resource.id.name,
-                    cmd=" ".join(cmd),
-                    image_uri=resource.id.name,
-                    region=deployment_region.string_value,
-                    project_id=gcp_project_id.string_value,
-                )
+            create_provider_runtime_image(
+                service.service.image.uri, service.id.name
+            )
 
-                services[resource.id.name] = svc_resource
+            svc_resource = Cloudrun(
+                self,
+                service.id.name,
+                service_name=service.id.name,
+                cmd=" ".join(cmd),
+                image_uri=service.id.name,
+                region=deployment_region.string_value,
+                project_id=gcp_project_id.string_value,
+            )
 
-            if resource_type == "bucket":
-                buck_resource = Storage(
-                    self,
-                    resource.id.name,
-                    bucket_location=deployment_region.string_value,
-                    bucket_name=resource.id.name,
-                    project_id=gcp_project_id.string_value,
-                )
+            services[service.id.name] = svc_resource
 
-                buckets[resource.id.name] = buck_resource
+        buckets: dict[str, Storage] = {}
+        # Deploy all buckets
+        for bucket in all_buckets:
+            buck_resource = Storage(
+                self,
+                bucket.id.name,
+                bucket_location=deployment_region.string_value,
+                bucket_name=bucket.id.name,
+                project_id=gcp_project_id.string_value,
+            )
 
-            if resource_type == "api":
+            buckets[bucket.id.name] = buck_resource
+
+        # Deploy all APIs
+        for api in all_apis:
+            # TODO: Update openapi spec to target deployed services
+            Api(
+                self,
+                api.id.name,
+                api_name=api.id.name,
+                project_id=gcp_project_id.string_value,
+                openapi_spec=api.api.openapi,
+                region=deployment_region.string_value,
+                labels={"test": "test"},
+            )
+
+        # Deploy all policies
+        for policy in all_policies:
+            for r in policy.policy.resources:
                 pass
 
-        # for resource in [r for r in resources if r.bucket is not None]:
-        #     Storage(
-        #         self,
-        #         resource.id.name,
-        #         bucket_name=resource.id.name,
-        #         bucket_location=deployment_region.string_value,
-        #         project_id=gcp_project_id.string_value,
-        #     )
-
-        # for resource in [r for r in resources if r.api is not None]:
-        #     # Edit the API Spec to targer the deployed services
-        #     Api(
-        #         self,
-        #         resource.id.name,
-        #         api_name=resource.id.name,
-        #         project_id=gcp_project_id.string_value,
-        #         openapi_spec=resource.api.openapi,
-        #         region=deployment_region.string_value,
-        #         labels={"test": "test"},
-        #     )

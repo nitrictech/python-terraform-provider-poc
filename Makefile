@@ -1,11 +1,11 @@
 .PHONY: build
-build:
+build: generate
 	@docker build -t cdktf-gcp .
 
 install:
 	@pipenv install --dev
 
-generate:
+generate: install
 	@cdktf get
 
 run:

@@ -16,6 +16,14 @@
     {
       "name": "storage",
       "source": "./modules/storage"
+    },
+    {
+      "name": "roles",
+      "source": "./modules/roles"
+    },
+    {
+      "name": "policy",
+      "source": "./modules/policy"
     }
   ],
   "codeMakerOutput": "imports",

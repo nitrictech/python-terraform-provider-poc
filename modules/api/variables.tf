@@ -1,15 +1,15 @@
 variable "project_id" {
-  description = "The location of the pushed docker image to use"
+  description = "The google project id"
   type        = string
 }
 
 variable "api_name" {
-  description = "The location of the pushed docker image to use"
+  description = "The name of the deployed API"
   type        = string
 }
 
 variable "region" {
-  description = "The location to deploy the API Gateway into"
+  description = "The region to deploy the API Gateway to"
   type        = string
 }
 

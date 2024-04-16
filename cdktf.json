@@ -26,6 +26,11 @@
       "source": "./modules/policy"
     }
   ],
+  "terraformBackend": {
+    "local": {
+      "path": "./terraform.stack.tfstate"
+    }
+  },
   "codeMakerOutput": "imports",
   "context": {
 

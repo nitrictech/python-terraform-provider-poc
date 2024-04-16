@@ -1,10 +1,10 @@
 variable "project_id" {
-  description = "The location of the pushed docker image to use"
+  description = "The google project id"
   type        = string
 }
 
 variable "image_uri" {
-  description = "The location of the pushed docker image to use"
+  description = "The location of the docker image to deploy"
   type        = string
 }
 

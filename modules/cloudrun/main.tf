@@ -4,18 +4,18 @@
 #   provisioner "local-exec" {
 #      # Fix this build context
 #     command = <<EOF
-# mkdir -p ${path.module}/build-${var.name}
-# echo -e "${var.dockerfile}" > ${path.module}/build-${var.name}/Dockerfile
+# mkdir -p ${path.module}/build-${var.service_name}
+# echo -e "${var.dockerfile}" > ${path.module}/build-${var.service_name}/Dockerfile
 # EOF
 #   }
 # }
 
 # Build the Docker image
 # resource "docker_image" "image" {
-#   name = "gcr.io/${var.project_id}/${var.name}"
+#   name = "gcr.io/${var.project_id}/${var.service_name}"
 #   build {
 #     # Fix this build context
-#     context = "${path.module}/build-${var.name}"
+#     context = "${path.module}/build-${var.service_name}"
 #     build_args = {
 #       RUNTIME_URI = var.runtime_uri
 #       BASE_IMAGE = var.image_name
@@ -23,22 +23,28 @@
 #   }
 # }
 
+terraform {
+  required_providers {
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "3.0.2"
+    }
+  }
+}
+
 resource "docker_tag" "new_tag" {
   source_image = var.image_uri
-  target_image = "gcr.io/${var.project_id}/${var.name}"
+  target_image = "gcr.io/${var.project_id}/${var.service_name}"
 }
 
 # Push the Docker image to a Docker registry
 resource "docker_registry_image" "repo_image" {
-  name     = docker_image.image.name
-  triggers = {
-    digest = docker_image.image.id
-  }
+  name     = "gcr.io/${var.project_id}/${var.service_name}"
 }
 
 # Create a new GCP service account
 resource "google_service_account" "service_account" {
-  account_id   = "${var.name}-acct"
+  account_id   = substr(replace("acct-${var.service_name}", "_", ""), 0, 30)
   project      = var.project_id
 }
 
@@ -60,10 +66,10 @@ resource "google_project_iam_member" "iam_member_self" {
 
 # A Google CloudRun resource
 resource "google_cloud_run_service" "nitric_compute" {
-  name     = var.name
+  name     = var.service_name
   location = var.region
   project  = var.project_id
-  autogen_revision_name = true
+  autogenerate_revision_name = true
 
   template {
     spec {
@@ -83,7 +89,7 @@ resource "google_cloud_run_service" "nitric_compute" {
 
 # Create a new GCP service account
 resource "google_service_account" "invoker_account" {
-  account_id   = "${var.name}-invoker"
+  account_id   = substr(replace("inv-${var.service_name}", "_", ""), 0, 30)
   project      = var.project_id
 }
 

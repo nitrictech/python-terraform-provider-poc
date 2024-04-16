@@ -22,6 +22,7 @@ cdktf = "~=0.20.0"
 docker = "7.0.0"
 pyinstaller = "*"
 jsii = "*"
+cdktf-cdktf-provider-docker = "~=11.0.0"
 
 [dev-packages]
 grpcio-tools = "1.62.0"

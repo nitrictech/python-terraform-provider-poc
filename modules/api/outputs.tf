@@ -1,4 +1,4 @@
-output "container_app_identity" {
-  value       = azurerm_container_app.app.identity.0.principal_id
-  description = "The managed identity of this container app"
+output "hostname" {
+  value       = google_api_gateway_gateway.gateway.default_hostname
+  description = "The hostname of the deployed api gateway"
 }

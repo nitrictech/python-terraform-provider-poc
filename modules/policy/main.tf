@@ -5,6 +5,7 @@ locals {
 }
 
 module "custom_roles" {
+  project_id = var.project_id
   source = "../roles"
 }
 

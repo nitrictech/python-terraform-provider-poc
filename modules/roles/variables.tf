@@ -1,4 +1,4 @@
 variable "project_id" {
-  description = "The project to deploy into"
+  description = "The google project id"
   type        = string
 }

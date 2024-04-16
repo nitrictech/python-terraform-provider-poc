@@ -9,7 +9,22 @@ resource "google_project_iam_custom_role" "base_compute_role" {
   title       = "Nitric Base Compute"
   description = "Custom role for base nitric compute permissions"
   project     = var.project_id
-  permissions = []
+  permissions = [
+    "storage.buckets.list",
+    "storage.buckets.get",
+    # "cloudtasks.queues.get",
+    # "cloudtasks.tasks.create",
+    # "cloudtrace.traces.patch",
+    # "monitoring.timeSeries.create",
+    "iam.serviceAccounts.signBlob",
+    // Basic list permissions
+    # "pubsub.topics.list",
+    # "pubsub.topics.get",
+    # "pubsub.snapshots.list",
+    # "pubsub.subscriptions.get",
+    "resourcemanager.projects.get",
+    "apigateway.gateways.list",
+  ]
 }
 
 # Permissions required for reading from a bucket

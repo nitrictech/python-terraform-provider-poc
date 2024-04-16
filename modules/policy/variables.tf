@@ -1,3 +1,8 @@
+variable "project_id" {
+  description = "The google project id"
+  type        = string
+}
+
 variable "resource_type" {
   description = "The type of the resource"
   type        = string

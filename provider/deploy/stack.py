@@ -1,7 +1,9 @@
+import json
+from multiprocessing import Value
 import os
 import shutil
 import betterproto
-from cdktf import TerraformStack, TerraformVariable
+from cdktf import TerraformStack, TerraformVariable, Fn
 from constructs import Construct
 from nitric.proto.deployments.v1 import (
     # DeploymentBase,
@@ -18,6 +20,7 @@ from imports.storage import Storage
 from imports.api import Api
 from imports.roles import Roles
 from imports.policy import Policy
+from provider.deploy.api import convert_openapi_to_swagger
 
 
 def source_image_cmd(source_image):
@@ -98,15 +101,32 @@ class TerraformGoogleCloudStack(TerraformStack):
         )
 
         # Normally this would be a separate stack
-        # Adding this here for the sake of demo completeness 
-        nitric_roles = Roles(self, "nitric_roles", project_id=gcp_project_id.string_value)
+        # Adding this here for the sake of demo completeness
+        nitric_roles = Roles(
+            self, "nitric_roles", project_id=gcp_project_id.string_value
+        )
 
         # Filter for all services in resources
-        all_services = [res for res in resources if betterproto.which_one_of(res, "config")[0] == "service"]
-        all_apis = [res for res in resources if betterproto.which_one_of(res, "config")[0] == "api"]
-        all_buckets = [res for res in resources if betterproto.which_one_of(res, "config")[0] == "bucket"]
-        all_policies = [res for res in resources if betterproto.which_one_of(res, "config")[0] == "policy"]
-
+        all_services = [
+            res
+            for res in resources
+            if betterproto.which_one_of(res, "config")[0] == "service"
+        ]
+        all_apis = [
+            res
+            for res in resources
+            if betterproto.which_one_of(res, "config")[0] == "api"
+        ]
+        all_buckets = [
+            res
+            for res in resources
+            if betterproto.which_one_of(res, "config")[0] == "bucket"
+        ]
+        all_policies = [
+            res
+            for res in resources
+            if betterproto.which_one_of(res, "config")[0] == "policy"
+        ]
 
         services: dict[str, Cloudrun] = {}
         # Deploy all services
@@ -114,9 +134,7 @@ class TerraformGoogleCloudStack(TerraformStack):
             # Wrap the source image with the runtime
             cmd = source_image_cmd(service.service.image.uri)
 
-            create_provider_runtime_image(
-                service.service.image.uri, service.id.name
-            )
+            create_provider_runtime_image(service.service.image.uri, service.id.name)
 
             svc_resource = Cloudrun(
                 self,
@@ -145,13 +163,33 @@ class TerraformGoogleCloudStack(TerraformStack):
 
         # Deploy all APIs
         for api in all_apis:
-            # TODO: Update openapi spec to target deployed services
+            raw_spec = json.loads(convert_openapi_to_swagger(api.api.openapi))
+
+            for path, methods in raw_spec["paths"].items():
+                for method, details in methods.items():
+                    if "x-nitric-target" in details:
+                        target = details["x-nitric-target"]
+                        target_service = services[target["name"]]
+
+                        if target_service is None or target_service == "":
+                            raise ValueError(
+                                f"Could not find service: {target['name']} in API spec"
+                            )
+
+                        details["x-google-backend"] = {
+                            # TODO: Translate
+                            "address": f"{target_service.url_output}/x-nitric-api/{api.id.name}",
+                            "path_translation": "APPEND_PATH_TO_ADDRESS",
+                        }
+
+            google_spec = json.dumps(raw_spec)
+
             Api(
                 self,
                 api.id.name,
                 api_name=api.id.name,
                 project_id=gcp_project_id.string_value,
-                openapi_spec=api.api.openapi,
+                openapi_spec=google_spec,
                 region=deployment_region.string_value,
                 labels={"test": "test"},
             )
@@ -160,4 +198,3 @@ class TerraformGoogleCloudStack(TerraformStack):
         for policy in all_policies:
             for r in policy.policy.resources:
                 pass
-

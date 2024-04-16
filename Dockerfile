@@ -38,7 +38,8 @@ RUN apt-get update && apt-get install -y curl && \
     curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y nodejs
 
-
+# Install api-spec-converter
+RUN npm install -g api-spec-converter
 
 # Copy the requirements file to the container
 # Copy the Pipfile and Pipfile.lock to the container

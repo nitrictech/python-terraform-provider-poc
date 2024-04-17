@@ -2,10 +2,19 @@
 # That translate to nitric permissions
 # For a given project this would only need to be done once for all nitric stacks deployed to that project
 
+# Generate a random id for the bucket
+resource "random_id" "role_id" {
+  byte_length = 8
+
+  keepers = {
+    # Generate a new id each time we switch to a new AMI id
+    project_id = var.project_id
+  }
+}
 
 # Permissions required for compute units to operate
 resource "google_project_iam_custom_role" "base_compute_role" {
-  role_id     = "NitricBaseCompute"
+  role_id     = "NitricBaseCompute_${random_id.role_id.hex}"
   title       = "Nitric Base Compute"
   description = "Custom role for base nitric compute permissions"
   project     = var.project_id

@@ -9,6 +9,7 @@ install:
 .PHONY: generate
 generate: install clean
 	@cdktf get
+	@touch imports/__init__.py
 
 clean:
 	@rm -rf imports

@@ -1,10 +1,6 @@
-import json
 from typing import AsyncIterator
 import os
-from cdktf import App
-from .stack import TerraformGoogleCloudStack
 from nitric.utils import dict_from_struct
-from betterproto.lib.google.protobuf import Struct, Value
 from nitric.proto.deployments.v1 import (
     DeploymentBase,
     DeploymentUpRequest,
@@ -12,6 +8,8 @@ from nitric.proto.deployments.v1 import (
     DeploymentDownRequest,
     DeploymentDownEvent,
 )
+from cdktf import App
+from .stack import TerraformGoogleCloudStack
 
 
 # def value_to_pyvalue(value: Value):
@@ -78,5 +76,5 @@ class DeploymentService(DeploymentBase):
         # stack based on the current tfstate
         # This can be done by simply spawning the terraform CLI against the current terraform project
         yield DeploymentDownEvent(
-            message="Run terraform destroy to tear down the stack"
+            message="this provider does not support down operations.\nUse `terraform destroy` on the generated output."
         )

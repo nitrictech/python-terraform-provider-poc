@@ -3,6 +3,16 @@ variable "project_id" {
   type        = string
 }
 
+variable "stack_id" {
+  description = "The ID of the Nitric stack"
+  type        = string
+}
+
+variable "base_compute_role" {
+  description = "The role ID for the Nitric base compute role"
+  type        = string
+}
+
 variable "image_uri" {
   description = "The location of the docker image to deploy"
   type        = string

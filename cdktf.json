@@ -24,6 +24,10 @@
     {
       "name": "policy",
       "source": "./modules/policy"
+    },
+    {
+      "name": "stack",
+      "source": "./modules/stack"
     }
   ],
   "terraformBackend": {

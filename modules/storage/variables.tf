@@ -3,6 +3,11 @@ variable "bucket_name" {
   type        = string
 }
 
+variable "stack_id" {
+  description = "The ID of the Nitric stack"
+  type        = string
+}
+
 variable "bucket_location" {
   description = "The location where the bucket and its contents are stored."
   type        = string

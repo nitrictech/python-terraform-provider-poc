@@ -81,6 +81,13 @@ resource "google_project_iam_member" "iam_member_self" {
   member  = "serviceAccount:${google_service_account.service_account.email}"
 }
 
+# Grant the service account the 'Nitric base compute role' role
+resource "google_project_iam_member" "base_compute_role" {
+  project = var.project_id
+  role    = var.base_compute_role
+  member  = "serviceAccount:${google_service_account.service_account.email}"
+}
+
 # A Google CloudRun resource
 resource "google_cloud_run_service" "nitric_compute" {
   name     = replace("${var.service_name}", "_", "-")
@@ -98,6 +105,26 @@ resource "google_cloud_run_service" "nitric_compute" {
           container_port = 9001
         }
         args = var.cmd
+
+        env {
+          name = "NITRIC_STACK_ID"
+          value = var.stack_id
+        }
+
+        env {
+          name = "NITRIC_ENVIRONMENT"
+          value = "cloud"
+        }
+
+        env {
+          name = "GCP_REGION"
+          value = var.region
+        }
+
+        env {
+          name = "SERVICE_ACCOUNT_EMAIL"
+          value = google_service_account.service_account.email
+        }
       }
     }
   }

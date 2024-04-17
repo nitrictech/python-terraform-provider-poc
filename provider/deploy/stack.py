@@ -12,6 +12,7 @@ from nitric.proto.deployments.v1 import (
     # DeploymentDownRequest,
     # DeploymentDownEvent
 )
+from nitric.proto.resources.v1 import ResourceType, Action
 import docker
 from docker.errors import APIError
 
@@ -20,7 +21,9 @@ from imports.storage import Storage
 from imports.api import Api
 from imports.roles import Roles
 from imports.policy import Policy
+from imports.stack import Stack
 from provider.deploy.api import convert_openapi_to_swagger
+from nitric.utils import dict_from_struct
 
 
 def source_image_cmd(source_image):
@@ -81,9 +84,6 @@ class TerraformGoogleCloudStack(TerraformStack):
 
     def __init__(self, scope: Construct, id: str, req: DeploymentUpRequest):
         super().__init__(scope, id)
-
-        # region: str = req.attributes.to_dict().get("region", "us-central1")
-        # project_id: str = req.attributes.to_dict().get("gcp-project-id", None)
         resources = req.spec.resources
 
         gcp_project_id = TerraformVariable(
@@ -99,6 +99,13 @@ class TerraformGoogleCloudStack(TerraformStack):
             type="string",
             description="What region should the stack be deployed to",
         )
+
+        attributes = dict_from_struct(req.attributes)
+        project_name = attributes["project"]
+        stack_name = attributes["stack"]
+        full_stack_name = f"{project_name}-{stack_name}"
+
+        stack = Stack(self, "stack", stack_name=full_stack_name)
 
         # Normally this would be a separate stack
         # Adding this here for the sake of demo completeness
@@ -140,10 +147,12 @@ class TerraformGoogleCloudStack(TerraformStack):
                 self,
                 service.id.name,
                 service_name=service.id.name,
+                stack_id=stack.stack_id_output,
                 cmd=cmd,
                 image_uri=service.id.name,
                 region=deployment_region.string_value,
                 project_id=gcp_project_id.string_value,
+                base_compute_role=nitric_roles.base_compute_role_output,
             )
 
             services[service.id.name] = svc_resource
@@ -154,6 +163,7 @@ class TerraformGoogleCloudStack(TerraformStack):
             buck_resource = Storage(
                 self,
                 bucket.id.name,
+                stack_id=stack.stack_id_output,
                 bucket_location=deployment_region.string_value,
                 bucket_name=bucket.id.name,
                 project_id=gcp_project_id.string_value,
@@ -196,5 +206,27 @@ class TerraformGoogleCloudStack(TerraformStack):
 
         # Deploy all policies
         for policy in all_policies:
-            for r in policy.policy.resources:
-                pass
+            for principal in policy.policy.principals:
+                if principal.id.type != ResourceType.Service:
+                    raise ValueError(f"Principal type not supported: {principal.id.type}")
+                
+                service_account_email = services[principal.id.name].service_account_email_output
+                
+                for r in policy.policy.resources:
+                    resource_name = ""
+                    if r.id.type == ResourceType.Bucket:
+                        resource_name = buckets[bucket.id.name].bucket_name_output
+                    else:
+                        raise ValueError(f"Resource type not supported: {r.id.type}")
+
+                    named_actions = [Action(action).name for action in policy.policy.actions]
+
+                    Policy(
+                        self,
+                        f"{principal.id.name}-{r.id.name}",
+                        project_id=gcp_project_id.string_value,
+                        resource_type=ResourceType(r.id.type).name,
+                        resource_name=resource_name,
+                        service_account_email=service_account_email,
+                        actions=named_actions
+                    )

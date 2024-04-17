@@ -13,11 +13,12 @@ variable "resource_name" {
   type        = string
 }
 
-variable "roles" {
-    description = "The custom roles to apply"
-    type        = object({
-        bucket_read       = string
-        bucket_write      = string
-        bucket_delete     = string
-    })
+variable "service_account_email" {
+  description = "The service account to apply the policy to"
+  type = string
+}
+
+variable "actions" {
+  description = "The actions to apply to the policy"
+  type        = list(string)
 }

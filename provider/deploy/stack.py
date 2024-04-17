@@ -3,7 +3,7 @@ from multiprocessing import Value
 import os
 import shutil
 import betterproto
-from cdktf import TerraformStack, TerraformVariable, Fn
+from cdktf import TerraformStack, TerraformVariable, LocalBackend
 from constructs import Construct
 from nitric.proto.deployments.v1 import (
     # DeploymentBase,
@@ -99,6 +99,8 @@ class TerraformGoogleCloudStack(TerraformStack):
             type="string",
             description="What region should the stack be deployed to",
         )
+
+        LocalBackend(self, path=f"./terraform.{id}.tfstate")
 
         attributes = dict_from_struct(req.attributes)
         project_name = attributes["project"]

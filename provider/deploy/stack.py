@@ -140,7 +140,7 @@ class TerraformGoogleCloudStack(TerraformStack):
                 self,
                 service.id.name,
                 service_name=service.id.name,
-                cmd=" ".join(cmd),
+                cmd=cmd,
                 image_uri=service.id.name,
                 region=deployment_region.string_value,
                 project_id=gcp_project_id.string_value,

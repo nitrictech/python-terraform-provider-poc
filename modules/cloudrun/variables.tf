@@ -20,5 +20,5 @@ variable "region" {
 
 variable "cmd" {
   description = "The command that will be executed in the container"
-  type        = string
+  type        = list(string)
 }

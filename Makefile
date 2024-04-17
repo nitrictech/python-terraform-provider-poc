@@ -5,8 +5,11 @@ build: generate
 install:
 	@pipenv install --dev
 
-generate: install
+generate: install clean
 	@cdktf get
+
+clean:
+	@rm -rf imports
 
 run:
 	@docker run -it --rm -v $(PWD)/cdktf:/cdktf cdktf-gcp

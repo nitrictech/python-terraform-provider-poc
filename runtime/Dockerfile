@@ -6,7 +6,7 @@ FROM $BASE_IMAGE
 
 # ARG RUNTIME_URI
 # This needs to be published externally for terraform
-ARG RUNTIME_URI
+# ARG RUNTIME_URI
 
 COPY runtime /bin/runtime
 RUN chmod +x-rw /bin/runtime

@@ -54,6 +54,9 @@ resource "docker_tag" "new_tag" {
 # Push the Docker image to a Docker registry
 resource "docker_registry_image" "repo_image" {
   name     = "gcr.io/${var.project_id}/${var.service_name}"
+  triggers = {
+    build_id = docker_tag.new_tag.source_image_id
+  }
 }
 
 # Create a new GCP service account
@@ -94,7 +97,7 @@ resource "google_cloud_run_service" "nitric_compute" {
         ports {
           container_port = 9001
         }
-        command = [var.cmd]
+        args = var.cmd
       }
     }
   }
@@ -103,6 +106,11 @@ resource "google_cloud_run_service" "nitric_compute" {
     percent         = 100
     latest_revision = true
   }
+
+  depends_on = [
+    docker_registry_image.repo_image,
+    # Add other dependencies here
+  ]
 }
 
 # Create a new GCP service account

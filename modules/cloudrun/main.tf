@@ -32,6 +32,20 @@ terraform {
   }
 }
 
+# FIXME: This is a workaround to get the access token for the Docker registry
+# This should be properly configured by impersonating a known service account with GAR access
+data "external" "gcloud_access_token" {
+  program = ["bash", "-c", "gcloud auth print-access-token --format json"]
+}
+
+provider "docker" {
+  registry_auth {
+    address  = "gcr.io"
+    username = "oauth2accesstoken"
+    password = data.external.gcloud_access_token.result.token
+  }
+}
+
 resource "docker_tag" "new_tag" {
   source_image = var.image_uri
   target_image = "gcr.io/${var.project_id}/${var.service_name}"
@@ -66,7 +80,7 @@ resource "google_project_iam_member" "iam_member_self" {
 
 # A Google CloudRun resource
 resource "google_cloud_run_service" "nitric_compute" {
-  name     = var.service_name
+  name     = replace("${var.service_name}", "_", "-")
   location = var.region
   project  = var.project_id
   autogenerate_revision_name = true
@@ -74,8 +88,12 @@ resource "google_cloud_run_service" "nitric_compute" {
   template {
     spec {
       service_account_name = google_service_account.service_account.email
+      
       containers {
-        image = var.image_uri
+        image = "gcr.io/${var.project_id}/${var.service_name}"
+        ports {
+          container_port = 9001
+        }
         command = [var.cmd]
       }
     }

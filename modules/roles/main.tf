@@ -2,7 +2,7 @@
 # That translate to nitric permissions
 # For a given project this would only need to be done once for all nitric stacks deployed to that project
 
-# Generate a random id for the bucket
+# Generate a random id the nitric roles
 resource "random_id" "role_id" {
   byte_length = 8
 

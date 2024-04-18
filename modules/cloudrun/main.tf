@@ -32,6 +32,15 @@ terraform {
   }
 }
 
+resource "random_id" "service_account_id" {
+  byte_length = 2
+
+  keepers = {
+    # Generate a new id each time we switch to a new AMI id
+    project_id = var.service_name
+  }
+}
+
 # FIXME: This is a workaround to get the access token for the Docker registry
 # This should be properly configured by impersonating a known service account with GAR access
 data "external" "gcloud_access_token" {
@@ -61,7 +70,7 @@ resource "docker_registry_image" "repo_image" {
 
 # Create a new GCP service account
 resource "google_service_account" "service_account" {
-  account_id   = substr(replace("acct-${var.service_name}", "_", ""), 0, 30)
+  account_id   = substr(replace("acct-${random_id.service_account_id.hex}-${var.service_name}", "_", ""), 0, 30)
   project      = var.project_id
 }
 
@@ -142,7 +151,7 @@ resource "google_cloud_run_service" "nitric_compute" {
 
 # Create a new GCP service account
 resource "google_service_account" "invoker_account" {
-  account_id   = substr(replace("inv-${var.service_name}", "_", ""), 0, 30)
+  account_id   = substr(replace("inv-${random_id.service_account_id.hex}-${var.service_name}", "_", ""), 0, 30)
   project      = var.project_id
 }
 

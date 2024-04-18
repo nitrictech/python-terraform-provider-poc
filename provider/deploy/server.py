@@ -50,7 +50,7 @@ class DeploymentService(DeploymentBase):
         # Start the tf cdk deployment
         # The end result will be the synthesis of a terraform application
         # This will be a json output, but HCL output is also possible if required
-        yield DeploymentUpEvent(message="Starting CDKTF Deployment")
+        yield DeploymentUpEvent(message="Starting CDKTF Stack Synthesis...")
 
         attributes = dict_from_struct(deployment_up_request.attributes)
 
@@ -63,11 +63,17 @@ class DeploymentService(DeploymentBase):
             outdir="/workspace/output",
             context={"cdktfRelativeModules": ["./modules"]},
         )
-        TerraformGoogleCloudStack(app, "stack", deployment_up_request)
+        project_name = attributes["project"]
+        stack_name = attributes["stack"]
+        full_stack_name = f"{project_name}-{stack_name}"
 
-        yield DeploymentUpEvent(message="Outputting results to {output}")
+        TerraformGoogleCloudStack(app, full_stack_name, deployment_up_request)
+
+        yield DeploymentUpEvent(message="Writing results to ./output")
 
         app.synth()
+
+        yield DeploymentUpEvent(message="Done")
 
     async def down(
         self, deployment_down_request: DeploymentDownRequest

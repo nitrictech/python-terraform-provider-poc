@@ -101,12 +101,7 @@ class TerraformGoogleCloudStack(TerraformStack):
 
         LocalBackend(self, path=f"./terraform.{id}.tfstate")
 
-        attributes = dict_from_struct(req.attributes)
-        project_name = attributes["project"]
-        stack_name = attributes["stack"]
-        full_stack_name = f"{project_name}-{stack_name}"
-
-        stack = Stack(self, "stack", stack_name=full_stack_name)
+        stack = Stack(self, "stack", stack_name=id)
 
         # Normally this would be a separate stack
         # Adding this here for the sake of demo completeness

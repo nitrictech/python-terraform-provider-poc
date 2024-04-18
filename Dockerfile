@@ -32,6 +32,7 @@ VOLUME [ "/workspace", "/var/run/docker.sock" ]
 
 # # Install Docker
 # RUN apt-get install -y docker-ce
+ENV PIPENV_VERBOSITY=-1
 
 # Install Node.js (needed for jsii)
 RUN apt-get update && apt-get install -y curl && \

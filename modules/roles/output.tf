@@ -17,3 +17,13 @@ output "base_compute_role" {
 #   value = google_project_iam_custom_role.bucket_deleter_role.id
 #   description = "The role ID for the Nitric bucket delete role"
 # }
+
+output "secret_access" {
+  value       = google_project_iam_custom_role.secret_access_role.id
+  description = "The role ID for the Nitric secrete access role"
+}
+
+output "secret_put" {
+  value       = google_project_iam_custom_role.secret_put_role.id
+  description = "The role ID for the Nitric secrete put role"
+}

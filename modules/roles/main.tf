@@ -26,13 +26,13 @@ resource "google_project_iam_custom_role" "base_compute_role" {
     # "cloudtrace.traces.patch",
     # "monitoring.timeSeries.create",
     "iam.serviceAccounts.signBlob",
-    // Basic list permissions
     # "pubsub.topics.list",
     # "pubsub.topics.get",
     # "pubsub.snapshots.list",
     # "pubsub.subscriptions.get",
     "resourcemanager.projects.get",
     "apigateway.gateways.list",
+    "secretmanager.secrets.list",
   ]
 }
 
@@ -63,3 +63,35 @@ resource "google_project_iam_custom_role" "base_compute_role" {
 #   project     = var.project_id
 #   permissions = ["storage.objects.delete"]
 # }
+
+# Permissions required to access a secret
+resource "google_project_iam_custom_role" "secret_access_role" {
+  project = var.project_id
+  role_id     = "SecretAccessRole"  
+  title       = "Secret Access Role"
+  permissions = ["resourcemanager.projects.get",
+		"secretmanager.locations.get",
+		"secretmanager.locations.list",
+		"secretmanager.secrets.get",
+		"secretmanager.secrets.getIamPolicy",
+		"secretmanager.versions.get",
+		"secretmanager.versions.access",
+		"secretmanager.versions.list",
+    ]
+}
+
+# Permissions required to put a secret
+resource "google_project_iam_custom_role" "secret_put_role" {
+  project = var.project_id
+  role_id     = "SecretPutRole"  
+  title       = "Secret Put Role"
+  permissions = ["resourcemanager.projects.get",
+		"secretmanager.versions.add",
+		"secretmanager.versions.enable",
+		"secretmanager.versions.destroy",
+		"secretmanager.versions.disable",
+		"secretmanager.versions.get",
+		"secretmanager.versions.access",
+		"secretmanager.versions.list",
+    ]
+}

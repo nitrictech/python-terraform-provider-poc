@@ -28,6 +28,10 @@
     {
       "name": "stack",
       "source": "./modules/stack"
+    },
+    {
+      "name": "secrets",
+      "source": "./modules/secrets"
     }
   ],
   "terraformBackend": {

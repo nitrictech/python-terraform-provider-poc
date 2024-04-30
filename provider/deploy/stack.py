@@ -16,6 +16,7 @@ import docker
 from docker.errors import APIError
 
 from imports.cloudrun import Cloudrun
+from imports.secrets import Secrets
 from imports.storage import Storage
 from imports.api import Api
 from imports.roles import Roles
@@ -125,6 +126,11 @@ class TerraformGoogleCloudStack(TerraformStack):
             for res in resources
             if betterproto.which_one_of(res, "config")[0] == "bucket"
         ]
+        all_secrets = [
+            res
+            for res in resources
+            if betterproto.which_one_of(res, "config")[0] == "secret"
+        ]
         all_policies = [
             res
             for res in resources
@@ -166,6 +172,21 @@ class TerraformGoogleCloudStack(TerraformStack):
             )
 
             buckets[bucket.id.name] = buck_resource
+
+        secrets: dict[str, Secrets] = {}
+
+        # Deploy all secrets
+        for secret in all_secrets:
+            sec_resource = Secrets(
+                self,
+                secret.id.name,
+                stack_id=stack.stack_id_output,
+                stack_name=stack.stack_name,
+                secret_name=secret.id.name,
+                project_id=gcp_project_id.string_value,
+            )
+
+            secrets[secret.id.name] = sec_resource
 
         # Deploy all APIs
         for api in all_apis:
@@ -212,8 +233,10 @@ class TerraformGoogleCloudStack(TerraformStack):
                     resource_name = ""
                     if r.id.type == ResourceType.Bucket:
                         resource_name = buckets[bucket.id.name].bucket_name_output
+                    elif r.id.type == ResourceType.Secret:
+                        resource_name = secrets[secret.id.name].secret_name_output
                     else:
-                        raise ValueError(f"Resource type not supported: {r.id.type}")
+                        raise ValueError(f"Resource type not supported: {r.id.type}-{r.id.name}")
 
                     named_actions = [Action(action).name for action in policy.policy.actions]
 

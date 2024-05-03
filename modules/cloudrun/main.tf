@@ -70,7 +70,8 @@ resource "docker_registry_image" "repo_image" {
 
 # Create a new GCP service account
 resource "google_service_account" "service_account" {
-  account_id   = substr(replace("acct-${random_id.service_account_id.hex}-${var.service_name}", "_", ""), 0, 30)
+  # FIXME: improve the account_id generation
+  account_id   = substr(replace(replace("acct${random_id.service_account_id.hex}${var.service_name}", "_", ""), "-", ""), 0, 30)
   project      = var.project_id
 }
 
@@ -151,7 +152,8 @@ resource "google_cloud_run_service" "nitric_compute" {
 
 # Create a new GCP service account
 resource "google_service_account" "invoker_account" {
-  account_id   = substr(replace("inv-${random_id.service_account_id.hex}-${var.service_name}", "_", ""), 0, 30)
+  # FIXME: improve the account_id generation
+  account_id   = substr(replace(replace("inv${random_id.service_account_id.hex}${var.service_name}", "_", ""), "-", ""), 0, 30)
   project      = var.project_id
 }
 

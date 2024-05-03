@@ -1,0 +1,42 @@
+{
+  "language": "python",
+  "app": "pipenv run python main.py",
+  "projectId": "2aa2867a-aeaa-4ef6-afdb-d6cddb0e5a6a",
+  "sendCrashReports": "false",
+  "terraformProviders": [],
+  "terraformModules": [
+    {
+      "name": "cloudrun",
+      "source": "./modules/cloudrun"
+    },
+    {
+      "name": "api",
+      "source": "./modules/api"
+    },
+    {
+      "name": "storage",
+      "source": "./modules/storage"
+    },
+    {
+      "name": "roles",
+      "source": "./modules/roles"
+    },
+    {
+      "name": "policy",
+      "source": "./modules/policy"
+    },
+    {
+      "name": "stack",
+      "source": "./modules/stack"
+    }
+  ],
+  "terraformBackend": {
+    "local": {
+      "path": "./terraform.stack.tfstate"
+    }
+  },
+  "codeMakerOutput": "imports",
+  "context": {
+
+  }
+}

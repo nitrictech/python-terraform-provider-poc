@@ -28,6 +28,14 @@
     {
       "name": "stack",
       "source": "./modules/stack"
+    },
+    {
+      "name": "secret",
+      "source": "./modules/secret"
+    },
+    {
+      "name": "queue",
+      "source": "./modules/queue"
     }
   ],
   "terraformBackend": {

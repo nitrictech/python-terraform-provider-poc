@@ -1,5 +1,5 @@
 imports/
-
+test/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -126,3 +126,9 @@ dmypy.json
 .pyre/
 
 .idea/
+
+.DS_Store
+
+Pipfile.lock
+
+README.md

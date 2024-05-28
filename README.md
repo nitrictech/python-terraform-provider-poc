@@ -1,1 +1,0 @@
-# python-terraform-provider-poc

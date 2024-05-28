@@ -1,7 +1,7 @@
 
 # Generate a random id for the bucket
 resource "random_id" "bucket_id" {
-  byte_length = 8
+  byte_length = 4
 
   keepers = {
     # Generate a new id each time we switch to a new AMI id

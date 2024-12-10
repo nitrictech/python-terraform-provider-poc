@@ -1,22 +1,18 @@
-[tool.poetry]
-name = "provider"
+[project]
+name = "python-terraform-provider-poc"
 version = "0.1.0"
-description = ""
-authors = ["Tim Holm <tim.holm@nitric.io>"]
+description = "Add your description here"
 readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "asyncio>=3.4.3",
+    "betterproto>=2.0.0b6",
+    "cdktf>=0.20.10",
+    "docker>=7.1.0",
+    "protobuf>=5.29.1",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-asyncio = "^3.4.3"
-protobuf = "4.23.3"
-betterproto = "2.0.0b6"
-nitric = "1.0.2"
-cdktf = "~=0.20.0"
-docker = "^7.0.0"
-
-[tool.poetry.dev-dependencies]
-grpcio-tools = "1.62.0"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[dependency-groups]
+dev = [
+    "grpcio-tools>=1.68.1",
+]

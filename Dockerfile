@@ -1,64 +1,35 @@
-# A dockerfile to build a docker image for the application
-# Use the official Python base image
-FROM python
+# The python version must match the version in .python-version
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
 
-# Set the working directory in the container
+ARG HANDLER
+ENV HANDLER=${HANDLER}
+
+ADD https://www.google.com/robots.txt /google.html
+
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy PYTHONPATH=.
 WORKDIR /app
+COPY uv.lock pyproject.toml /app/
+RUN --mount=type=cache,target=/root/.cache/uv \
+  uv sync --frozen --no-install-project --no-dev --no-python-downloads
+COPY . /app
+RUN --mount=type=cache,target=/root/.cache/uv \
+  uv sync --frozen --no-dev --no-python-downloads
 
-# Install pipenv
-RUN pip install pipenv
 
-VOLUME [ "/workspace", "/var/run/docker.sock" ]
+# Then, use a final image without uv
+FROM python:3.12-slim-bookworm
 
+ARG HANDLER
+ENV HANDLER=${HANDLER} PYTHONPATH=.
 
-# # Install a few prerequisite packages which let apt use packages over HTTPS
-# RUN apt-get install -y \
-#     apt-transport-https \
-#     ca-certificates \
-#     curl \
-#     software-properties-common
-
-# # Add the GPG key for the official Docker repository to your system
-# RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-
-# # Add the Docker repository to APT sources
-# RUN add-apt-repository \
-#    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-#    $(lsb_release -cs) \
-#    stable"
-
-# # Update the package database with the Docker packages from the newly added repo
-# RUN apt-get update
-
-# # Install Docker
-# RUN apt-get install -y docker-ce
-ENV PIPENV_VERBOSITY=-1
-
-# Install Node.js (needed for jsii)
-RUN apt-get update && apt-get install -y curl && \
-    curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs
-
-# Install api-spec-converter
-RUN npm install -g api-spec-converter
-
-# Copy the requirements file to the container
-# Copy the Pipfile and Pipfile.lock to the container
-COPY Pipfile Pipfile.lock ./
-
-# Generate requirements.txt from Pipenv
-RUN pipenv requirements > requirements.txt
-
-# Install the Python dependencies
-RUN pip install -r requirements.txt
-
-# Copy the application code to the container
-COPY . .
+# Copy the application from the builder
+COPY --from=builder /app /app
+WORKDIR /app
 
 EXPOSE 50051
 
-ENV PYTHONPATH=/app
-ENV PYTHONUNBUFFERED=1
+# Place executables in the environment at the front of the path
+ENV PATH="/app/.venv/bin:$PATH"
 
-# Set the entry point for the container
+# Run the service using the path to the handler
 CMD ["python", "./provider/main.py"]

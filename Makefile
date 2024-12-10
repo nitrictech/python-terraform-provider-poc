@@ -5,12 +5,11 @@ build: generate
 
 .PHONY: install
 install:
-	@export PIPENV_VERBOSITY=-1
-	@pipenv install --dev
+	@uv sync --dev
 
 .PHONY: generate
 generate: install clean
-	@cdktf get
+	@npx -y cdktf-cli@0.20.8 get
 	@touch imports/__init__.py
 
 clean:

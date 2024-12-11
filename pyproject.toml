@@ -9,10 +9,11 @@ dependencies = [
     "betterproto>=2.0.0b6",
     "cdktf>=0.20.10",
     "docker>=7.1.0",
-    "protobuf>=5.29.1",
+    "protobuf>=4.23.3",
+    "nitric ==1.2.3"
 ]
 
 [dependency-groups]
 dev = [
-    "grpcio-tools>=1.68.1",
+    "grpcio-tools>=1.62.3",
 ]

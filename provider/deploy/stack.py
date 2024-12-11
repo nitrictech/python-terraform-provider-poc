@@ -143,7 +143,7 @@ class TerraformGoogleCloudStack(TerraformStack):
             if betterproto.which_one_of(res, "config")[0] == "policy"
         ]
 
-        services: dict[str, Cloudrun] = {}
+        services: dict[str, Awslambda] = {}
         # Deploy all services
         for service in all_services:
             # Wrap the source image with the runtime

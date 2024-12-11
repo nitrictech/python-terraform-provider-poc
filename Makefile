@@ -1,7 +1,11 @@
 .PHONY: build
-build: generate
+build: generate runtime
 	@docker build -t cdktf-gcp .
 	@echo Docker container cdktf-gcp built
+
+.PHONY: runtime
+runtime:
+	@cd runtime && go build -o runtime ./cmd/main.go
 
 .PHONY: install
 install:
@@ -16,4 +20,4 @@ clean:
 	@rm -rf imports
 
 run:
-	@docker run -it --rm -v $(PWD)/cdktf:/cdktf cdktf-gcp
+	@docker run -it --rm -v $(PWD)/cdktf:/cdktf mapfre

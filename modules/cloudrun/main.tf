@@ -1,28 +1,4 @@
 
-# Write the Dockerfile to the file system
-# resource "null_resource" "copy_dockerfile" {
-#   provisioner "local-exec" {
-#      # Fix this build context
-#     command = <<EOF
-# mkdir -p ${path.module}/build-${var.service_name}
-# echo -e "${var.dockerfile}" > ${path.module}/build-${var.service_name}/Dockerfile
-# EOF
-#   }
-# }
-
-# Build the Docker image
-# resource "docker_image" "image" {
-#   name = "gcr.io/${var.project_id}/${var.service_name}"
-#   build {
-#     # Fix this build context
-#     context = "${path.module}/build-${var.service_name}"
-#     build_args = {
-#       RUNTIME_URI = var.runtime_uri
-#       BASE_IMAGE = var.image_name
-#     }
-#   }
-# }
-
 terraform {
   required_providers {
     docker = {
@@ -45,10 +21,6 @@ resource "random_id" "service_account_id" {
   }
 }
 
-provider "google" {
-  credentials = file("~/gcp/key.json")
-}
-
 data "google_client_config" "default" {}
 
 resource "google_project_service" "service_usage" {
@@ -58,61 +30,26 @@ resource "google_project_service" "service_usage" {
   disable_dependent_services = false
 }
 
-variable "required_services" {
-  default = [    
-    "iam.googleapis.com",
-    "run.googleapis.com",
-    "pubsub.googleapis.com",
-    "cloudscheduler.googleapis.com",
-    "storage.googleapis.com",
-    "compute.googleapis.com",
-    "containerregistry.googleapis.com",
-    "firestore.googleapis.com",
-    "apigateway.googleapis.com",
-    "secretmanager.googleapis.com",
-    "cloudtasks.googleapis.com",
-    "monitoring.googleapis.com",
-    "firebaserules.googleapis.com",
-  ]
-}
-
-# Ensure required Google services are enabled
-resource "google_project_service" "services" {
-  for_each = toset(var.required_services)
-
-  service  = each.key
-  project  = var.project_id
-  disable_on_destroy = false
-  disable_dependent_services = false
-  depends_on = [
-    google_project_service.service_usage
-  ]
-}
-
-# Delay to ensure services are activated before usage
-resource "time_sleep" "wait_after_services" {
-  create_duration = "120s"
-  depends_on = [
-    google_project_service.services
-  ]
+locals {
+  service_image_url = "${var.artifact_registry_repository}/${var.service_name}"
 }
 
 provider "docker" {
   registry_auth {
-    address  = "gcr.io"
-    username = "_json_key"
-    password = file("~/gcp/key.json")
+    address  = "${var.region}-docker.pkg.dev"
+    username = "oauth2accesstoken"
+    password = data.google_client_config.default.access_token
   }
 }
 
 resource "docker_tag" "new_tag" {
   source_image = var.image_uri
-  target_image = "gcr.io/${var.project_id}/${var.service_name}"
+  target_image = local.service_image_url
 }
 
 # Push the Docker image to a Docker registry
 resource "docker_registry_image" "repo_image" {
-  name = "gcr.io/${var.project_id}/${var.service_name}"
+  name = local.service_image_url
 
   triggers = {
     digest = docker_tag.new_tag.source_image_id
@@ -240,9 +177,7 @@ resource "google_firestore_database" "default" {
   type                        = "FIRESTORE_NATIVE"
   concurrency_mode            = "OPTIMISTIC"
 
-  depends_on = [
-    google_project_service.services
-  ]
+  depends_on = [ var.stack_id ]
 }
 
 # TODO: restrict to svc_email

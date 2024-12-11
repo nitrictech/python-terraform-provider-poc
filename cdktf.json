@@ -6,10 +6,6 @@
   "terraformProviders": [],
   "terraformModules": [
     {
-      "name": "awslambda",
-      "source": "./modules/lambda"
-    },
-    {
       "name": "cloudrun",
       "source": "./modules/cloudrun"
     },

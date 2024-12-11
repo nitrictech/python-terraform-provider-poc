@@ -32,3 +32,8 @@ variable "cmd" {
   description = "The command that will be executed in the container"
   type        = list(string)
 }
+
+variable "artifact_registry_repository" {
+    description = "The base URI for the artifact registry repository the push this services image to"
+    type        = string
+}

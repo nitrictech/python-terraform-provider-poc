@@ -69,6 +69,22 @@ wheels = [
 ]
 
 [[package]]
+name = "cdktf-cdktf-provider-google"
+version = "14.12.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cdktf" },
+    { name = "constructs" },
+    { name = "jsii" },
+    { name = "publication" },
+    { name = "typeguard" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d4/a6/a96c790541b4cdde4d68fe0f8160cdba849102ddb1539ed3b0bd883245b4/cdktf_cdktf_provider_google-14.12.0.tar.gz", hash = "sha256:ce560b13c5c359ef68902624560a0a1835b2adf4bf874b3808602882224ee1f1", size = 37432846 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/04/99/74d2eada74056d6eef9a1226231f8e3e664bcaef3789afb9e5257146f564/cdktf_cdktf_provider_google-14.12.0-py3-none-any.whl", hash = "sha256:f131b318df5b0d048bd84d82c33f192c7f9a1032a4e846085f3e3afa26ddc775", size = 39011673 },
+]
+
+[[package]]
 name = "certifi"
 version = "2024.8.30"
 source = { registry = "https://pypi.org/simple" }
@@ -512,6 +528,7 @@ dependencies = [
     { name = "asyncio" },
     { name = "betterproto" },
     { name = "cdktf" },
+    { name = "cdktf-cdktf-provider-google" },
     { name = "docker" },
     { name = "nitric" },
     { name = "protobuf" },
@@ -527,6 +544,7 @@ requires-dist = [
     { name = "asyncio", specifier = ">=3.4.3" },
     { name = "betterproto", specifier = ">=2.0.0b6" },
     { name = "cdktf", specifier = ">=0.20.10" },
+    { name = "cdktf-cdktf-provider-google", specifier = ">=14.12.0" },
     { name = "docker", specifier = ">=7.1.0" },
     { name = "nitric", specifier = "==1.2.3" },
     { name = "protobuf", specifier = ">=4.23.3" },

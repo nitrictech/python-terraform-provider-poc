@@ -14,6 +14,7 @@ from nitric.proto.deployments.v1 import (
 from nitric.proto.resources.v1 import ResourceType, Action
 import docker
 from docker.errors import APIError
+from cdktf_cdktf_provider_google import provider
 
 from imports.cloudrun import Cloudrun
 from imports.queue import Queue
@@ -103,7 +104,20 @@ class TerraformGoogleCloudStack(TerraformStack):
 
         LocalBackend(self, path=f"./terraform.{id}.tfstate")
 
-        stack = Stack(self, "stack", stack_name=id)
+        # Create google provider
+        provider.GoogleProvider(
+            scope=self,
+            id="google_provider",
+            project=gcp_project_id.string_value,
+            region=deployment_region.string_value,
+        )
+
+        stack = Stack(
+            self, 
+            "stack", 
+            stack_name=id,
+            region=deployment_region.string_value
+        )
 
         # Normally this would be a separate stack
         # Adding this here for the sake of demo completeness
@@ -143,7 +157,7 @@ class TerraformGoogleCloudStack(TerraformStack):
             if betterproto.which_one_of(res, "config")[0] == "policy"
         ]
 
-        services: dict[str, Awslambda] = {}
+        services: dict[str, Cloudrun] = {}
         # Deploy all services
         for service in all_services:
             # Wrap the source image with the runtime
@@ -161,6 +175,7 @@ class TerraformGoogleCloudStack(TerraformStack):
                 region=deployment_region.string_value,
                 project_id=gcp_project_id.string_value,
                 base_compute_role=nitric_roles.base_compute_role_output,
+                artifact_registry_repository=stack.container_registry_uri_output,
             )
 
             services[service.id.name] = svc_resource

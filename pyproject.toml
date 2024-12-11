@@ -10,7 +10,8 @@ dependencies = [
     "cdktf>=0.20.10",
     "docker>=7.1.0",
     "protobuf>=4.23.3",
-    "nitric ==1.2.3"
+    "nitric ==1.2.3",
+    "cdktf-cdktf-provider-google>=14.12.0",
 ]
 
 [dependency-groups]
